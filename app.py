@@ -71,14 +71,14 @@ def ideas():
 
 # ADMIN PANEL
 # ADMIN PANEL
-@app.route('/admin')
+# ADMIN PANEL
+@app.route('/neuroheal-control-x7k91')
 def admin():
     leads = []
 
     try:
         with open('leads.json', 'r') as f:
             leads = json.load(f)
-
     except:
         pass
 
