@@ -139,3 +139,6 @@ def delete():
         json.dump(leads, f, indent=2)
 
     return jsonify({"ok": True})
+
+if __name__ == "__main__":
+    app.run(debug=True)
