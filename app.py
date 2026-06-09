@@ -29,14 +29,7 @@ def lead():
         "ok": True,
         "message": "Successfully submitted!"
     })
-    # pehle purana data read karo
-    try:
-        with open('leads.json', 'r') as f:
-            for line in f:
-                leads.append(json.loads(line))
-    except:
-        pass
-
+    
     # check duplicate email
     for l in leads:
         if l.get("email") == new_email:
