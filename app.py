@@ -13,6 +13,7 @@ def home():
 @app.route('/api/lead', methods=['POST'])
 def lead():
     data = request.json
+    email = data.get("email", "").strip().lower()
 
     try:
         with open('leads.json', 'r') as f:
@@ -20,6 +21,15 @@ def lead():
     except:
         leads = []
 
+    # Duplicate email check
+    for lead in leads:
+        if lead.get("email", "").strip().lower() == email:
+            return jsonify({
+                "ok": False,
+                "error": "Email already exists!"
+            })
+
+    # Save new lead
     leads.append(data)
 
     with open('leads.json', 'w') as f:
@@ -28,23 +38,6 @@ def lead():
     return jsonify({
         "ok": True,
         "message": "Successfully submitted!"
-    })
-    
-    # check duplicate email
-    for l in leads:
-        if l.get("email") == new_email:
-            return jsonify({
-                "ok": False,
-                "error": "Email already exists!"
-            })
-
-    # agar duplicate nahi hai tab save karo
-    with open('leads.json', 'a') as f:
-        f.write(json.dumps(data) + "\n")
-
-    return jsonify({
-        "ok": True,
-        "message": "You're successfully added!"
     })
 
 # Ideas API
