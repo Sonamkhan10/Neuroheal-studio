@@ -1,7 +1,28 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template_string
 import json
+import sqlite3
 
 app = Flask(__name__)
+def init_db():
+    conn = sqlite3.connect("leads.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT,
+            name TEXT,
+            email TEXT UNIQUE,
+            organization TEXT,
+            message TEXT,
+            phone TEXT
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # Home route
 @app.route('/')
@@ -28,12 +49,31 @@ def lead():
                 "ok": False,
                 "error": "Email already exists!"
             })
-
-    # Save new lead
+    # Save new lead in JSON
     leads.append(data)
 
     with open('leads.json', 'w') as f:
         json.dump(leads, f, indent=2)
+
+    # Save new lead in SQLite
+    conn = sqlite3.connect("leads.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO leads (type, name, email, organization, message, phone)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        data.get("type"),
+        data.get("name"),
+        data.get("email"),
+        data.get("organization"),
+        data.get("message"),
+        data.get("phone")
+    ))
+
+    conn.commit()
+    print("Saved to SQLite:", data.get("email"))
+    conn.close()
 
     return jsonify({
         "ok": True,
