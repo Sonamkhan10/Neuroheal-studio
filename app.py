@@ -99,14 +99,28 @@ def ideas():
 # ADMIN PANEL
 @app.route('/neuroheal-control-x7k91')
 def admin():
+    conn = sqlite3.connect("leads.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT type, name, email, organization, message, phone
+    FROM leads
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
     leads = []
 
-    try:
-        with open('leads.json', 'r') as f:
-            leads = json.load(f)
-
-    except:
-        pass
+    for row in rows:
+        leads.append({
+            "type": row[0],
+            "name": row[1],
+            "email": row[2],
+            "organization": row[3],
+            "message": row[4],
+            "phone": row[5]
+        })
 
     return render_template_string("""
     <h2>My Leads</h2>
@@ -160,18 +174,17 @@ function deleteLead(email) {
 def delete():
     email = request.json.get("email")
 
-    try:
-        with open('leads.json', 'r') as f:
-            leads = json.load(f)
-    except:
-        leads = []
+    conn = sqlite3.connect("leads.db")
+    cursor = conn.cursor()
 
-    leads = [item for item in leads if item.get("email") != email]
+    cursor.execute(
+        "DELETE FROM leads WHERE email = ?",
+        (email,)
+    )
 
-    with open('leads.json', 'w') as f:
-        json.dump(leads, f, indent=2)
+    conn.commit()
+    conn.close()
 
     return jsonify({"ok": True})
-
 if __name__ == "__main__":
     app.run(debug=True)
